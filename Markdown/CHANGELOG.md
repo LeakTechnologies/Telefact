@@ -2,18 +2,24 @@
 
 All notable changes to the Telefact project will be documented in this file.
 
+## [0.3.3] - 2025-04-16
+### Changed
+- Updated the timestamp rendering in the header by adding a timer in **MainForm.cs** to refresh the UI every second. This ensures the displayed timestamp is dynamic and updates in real time.
+
+## [0.3.2] - 2025-04-16
+### Fixed
+- Removed extraneous top-level code from **Program.cs** to resolve build issues.
+
+## [0.3.1] - 2025-04-16
+### Moved
+- Moved documentation files (**README.md**, **CHANGELOG.md**, and **ROADMAP.md**) into the **Markdown** folder.
+
 ## [0.3.0] - 2025-04-16
 ### Added
-- Project initialization using Windows Forms.
-- Basic TeletextRenderer implementation that delegates rendering to header and footer components.
-- **TeletextHeader**:
-  - Renders fixed header elements including:
-    - Left page number (" P100")
-    - Service name ("Telefact") with a red background and yellow text.
-    - Right page number ("100")
-    - Timestamp (formatted as "MMM dd HH:mm:ss") right aligned.
-- **TeletextFooter**:
-  - Renders a footer line with dynamic row information.
-  - Implements a grid-based layout with a white background for content cells and black padding.
-  
-*Initial commit representing a basic working version of Telefact with core UI rendering.*
+- Initial commit featuring core UI rendering with Windows Forms.
+- Implemented **TeletextHeader** to display fixed header elements, including:
+  - Left page number (" P100")
+  - Service name ("Telefact") with a red background and yellow text
+  - Right page number ("100")
+  - Timestamp (formatted as "MMM dd HH:mm:ss") right aligned.
+- Implemented **TeletextFooter** to display dynamic footer information with a grid-based layout.
