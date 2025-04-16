@@ -27,8 +27,8 @@ namespace Telefact
             int totalColumns = TeletextGrid.TotalColumns;
 
             // Define header and footer rows.
-            int headerRows = 2;  // For example, header could be 2 rows.
-            int footerRows = 1;  // Footer is 1 row.
+            int headerRows = 2;  // Global header is 2 rows.
+            int footerRows = 1;  // Global footer is 1 row.
 
             // Compute cell sizes – adapt cell size to the window dimensions.
             int cellHeight = clientHeight / totalRows;
@@ -41,8 +41,16 @@ namespace Telefact
             // Render the content area.
             _content.Render(g, clientWidth, clientHeight, headerHeight, footerHeight, cellWidth, cellHeight);
 
-            // Render the footer, now passing both cellHeight and cellWidth.
+            // Render the footer.
             _footer.Render(g, clientWidth, clientHeight, cellHeight, cellWidth);
+        }
+
+        /// <summary>
+        /// Advances to the next subpage in the TeletextContent.
+        /// </summary>
+        public void NextSubpage()
+        {
+            _content.NextSubpage();
         }
     }
 }
