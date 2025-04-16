@@ -5,7 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Threading.Tasks;
 
-int totalWidth = (LeftPadding + PageWidth + RightPadding) * CellWidth;
+// int totalWidth = (LeftPadding + PageWidth + RightPadding) * CellWidth;
 
 namespace Telefact
 {
