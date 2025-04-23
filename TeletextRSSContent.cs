@@ -17,13 +17,19 @@ namespace Telefact
             "Top Stories",
             "Canada News",
             "World News",
+            "Politics News",
+            "Business News",
+            "Health News",
+            "Arts News",
+            "Technology News",
+            "Indigenous News"
             // add more categories as needed...
         };
 
         public const int PagesPerCategory = 10; // 300–309, 310–319, …
         public const int IndexOffset = 0;  // X0 shows the index
         public const int FirstStoryOffset = 1;  // X1–X6 show story pages
-        public const int StoriesPerCategory = 6;  // six items per category
+        public const int StoriesPerCategory = 5;  // five items per category
     }
 
     public class TeletextRSSContent
@@ -52,7 +58,7 @@ namespace Telefact
             int cellHeight
         )
         {
-            // Figure out category-block index (300→0, 310→1, etc.)
+            // Determine which category‐block this page belongs to (300→0, 310→1, etc.)
             int blockIndex = (_pageNumber / 10) - 30;
             if (blockIndex < 0 || blockIndex >= RSSPages.Categories.Count)
                 return;
@@ -69,6 +75,7 @@ namespace Telefact
 
             int totalRows = (clientHeight - headerHeight - footerHeight) / cellHeight;
             int y0 = headerHeight;
+            int cols = clientWidth / cellWidth;
 
             using (var font = new Font("Modeseven", cellHeight * 0.8f))
             {
@@ -76,7 +83,6 @@ namespace Telefact
                 if (sub == RSSPages.IndexOffset)
                 {
                     int row = 0;
-                    int cols = clientWidth / cellWidth;
 
                     foreach (var entry in feed.Items
                                               .Take(5)
@@ -84,20 +90,22 @@ namespace Telefact
                     {
                         if (row >= totalRows) break;
 
-                        // Title in UPPER
+                        // Headline in UPPERCASE
                         string rawTitle = entry.it.Title.Text.ToUpperInvariant();
+
                         // Compute the story page number
                         int blockStart = (_pageNumber / 10) * 10;
-                        string pageNum = (blockStart + entry.i + RSSPages.FirstStoryOffset).ToString();
+                        string pageNum = (blockStart + entry.i + RSSPages.FirstStoryOffset)
+                                           .ToString();
 
-                        // Calculate how many title chars fit before dot-leader + pageNum
+                        // Space for headline before dot‐leader + pageNum
                         int maxTitleCols = cols
                                          - LeftPadding
                                          - RightPadding
                                          - pageNum.Length
                                          - 1; // at least one dot
 
-                        // Wrap to up to 2 lines
+                        // Wrap into up to 2 lines
                         var lines = WordWrap(rawTitle, maxTitleCols)
                                     .Take(2)
                                     .ToList();
@@ -107,14 +115,14 @@ namespace Telefact
                             string text = lines[li];
                             float y = y0 + row * cellHeight;
 
-                            // 1a) draw each char of text in WHITE
+                            // 1a) Draw headline characters in WHITE
                             for (int ci = 0; ci < text.Length; ci++)
                             {
                                 float x = (LeftPadding + ci) * cellWidth;
                                 g.DrawString(text[ci].ToString(), font, Brushes.White, x, y);
                             }
 
-                            // 1b) if last wrapped line, draw dot-leader + pageNum
+                            // 1b) On the last wrapped line, draw dot‐leader + pageNum
                             if (li == lines.Count - 1)
                             {
                                 int dotStart = LeftPadding + text.Length;
@@ -127,7 +135,7 @@ namespace Telefact
                                     g.DrawString(".", font, Brushes.Cyan, x, y);
                                 }
 
-                                // white pageNum, right-aligned
+                                // white page number, right‐aligned
                                 for (int c = 0; c < pageNum.Length; c++)
                                 {
                                     float x = (cols - RightPadding - pageNum.Length + c) * cellWidth;
@@ -138,7 +146,7 @@ namespace Telefact
                             row++;
                         }
 
-                        // blank “breathing” row
+                        // blank breathing row
                         row++;
                     }
                 }
@@ -152,11 +160,12 @@ namespace Telefact
                     var item = feed.Items.ElementAtOrDefault(storyIdx);
                     if (item == null) return;
 
+                    int drawRow = 0;
+
                     // 2a) Title (UPPERCASE, WHITE)
                     string titleText = item.Title.Text.ToUpperInvariant();
                     var titleLines = WordWrap(titleText, PageWidth).ToList();
 
-                    int drawRow = 0;
                     foreach (var line in titleLines)
                     {
                         if (drawRow >= totalRows) break;
@@ -171,24 +180,25 @@ namespace Telefact
                         drawRow++;
                     }
 
-                    // blank line before body
+                    // blank row before body
                     if (drawRow < totalRows) drawRow++;
 
                     // 2b) Body text (original case, CYAN)
-                    // get summary or RSS <description>
                     string rawDesc = item.Summary?.Text
                                      ?? item.ElementExtensions
                                             .FirstOrDefault(e => e.OuterName == "description")
                                             ?.GetObject<XElement>()?.Value
                                      ?? "";
+
                     // strip HTML tags
                     string descText = Regex.Replace(rawDesc, "<.*?>", "");
 
-                    var descLines = WordWrap(descText, PageWidth)
-                                    .Take(totalRows - drawRow)
-                                    .ToList();
+                    var allDescLines = WordWrap(descText, PageWidth).ToList();
+                    var bodyLines = allDescLines
+                                          .Take(totalRows - drawRow)
+                                          .ToList();
 
-                    foreach (var line in descLines)
+                    foreach (var line in bodyLines)
                     {
                         if (drawRow >= totalRows) break;
                         float y = y0 + drawRow * cellHeight;
@@ -202,23 +212,25 @@ namespace Telefact
                         drawRow++;
                     }
 
-                    // 2c) Subpage counter bottom-right (CYAN)
-                    string counter = $"{sub + 1}/{RSSPages.PagesPerCategory}";
-                    SizeF sz = g.MeasureString(counter, font);
-                    float cx = clientWidth - ((RightPadding * cellWidth) + sz.Width + 5);
-                    float cy = clientHeight - footerHeight - sz.Height - 5;
-                    g.DrawString(counter, font, Brushes.Cyan, cx, cy);
+                    // 2c) Only draw subpage counter if there's overflow
+                    if (allDescLines.Count > bodyLines.Count)
+                    {
+                        string counter = $"{sub + 1}/{RSSPages.PagesPerCategory}";
+                        SizeF sz = g.MeasureString(counter, font);
+                        float cx = clientWidth - ((RightPadding * cellWidth) + sz.Width + 5);
+                        float cy = clientHeight - footerHeight - sz.Height - 5;
+                        g.DrawString(counter, font, Brushes.Cyan, cx, cy);
+                    }
                 }
             }
         }
 
         /// <summary>
-        /// Splits text on word boundaries so no line exceeds maxCols.
+        /// Splits text on word boundaries so no line exceeds maxCols characters.
         /// </summary>
         private IEnumerable<string> WordWrap(string text, int maxCols)
         {
-            var words = text
-                        .Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            var words = text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             var line = new StringBuilder();
 
             foreach (var w in words)
@@ -229,8 +241,7 @@ namespace Telefact
                     yield return line.ToString();
                     line.Clear();
                 }
-                if (line.Length > 0)
-                    line.Append(' ');
+                if (line.Length > 0) line.Append(' ');
                 line.Append(w);
             }
             if (line.Length > 0)
