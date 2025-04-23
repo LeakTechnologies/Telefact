@@ -1,62 +1,58 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A99D3473-AD51-4859-984B-4BEB6F963042}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>Telefact</RootNamespace>
-    <AssemblyName>Telefact</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Drawing" />
-  </ItemGroup>
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+	<PropertyGroup>
+		<!-- turn off SDK’s implicit Compile and AssemblyInfo generation -->
+		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+
+		<!-- use C# 9 so “using var…” and using declarations compile -->
+		<LangVersion>9.0</LangVersion>
+
+		<!-- target .NET Framework 4.8 WinForms -->
+		<TargetFramework>net48</TargetFramework>
+		<UseWindowsForms>true</UseWindowsForms>
+		<OutputType>WinExe</OutputType>
+		<RuntimeIdentifiers>win</RuntimeIdentifiers>
+		<AssemblyName>Telefact</AssemblyName>
+		<RootNamespace>Telefact</RootNamespace>
+
+		<!-- emit binaries directly into bin\<Configuration>\ rather than bin\<Configuration>\net48\ -->
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<OutputPath>bin\$(Configuration)\</OutputPath>
+	</PropertyGroup>
+
 	<ItemGroup>
-		<Compile Include="MainForm.cs" />
+		<!-- pull in the SyndicationFeed types from NuGet -->
+		<PackageReference Include="System.ServiceModel.Syndication" Version="4.6.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- framework assemblies not brought in by SDK -->
+		<Reference Include="System.Runtime.Caching" />
+		<Reference Include="System.Configuration" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- your source files -->
+		<Compile Include="MainForm.cs">
+			<SubType>Form</SubType>
+		</Compile>
 		<Compile Include="Program.cs" />
-		<Compile Include="Properties\AssemblyInfo.cs" />
 		<Compile Include="Renderer.cs" />
 		<Compile Include="TeletextFooter.cs" />
 		<Compile Include="TeletextHeader.cs" />
 		<Compile Include="TeletextContent.cs" />
+		<Compile Include="RssFeedParser.cs" />
+		<Compile Include="RssCacheManager.cs" />
+		<Compile Include="TeletextRssContent.cs" />
+		<Compile Include="ConfigManager.cs" />
+		<Compile Include="Properties\AssemblyInfo.cs" />
 	</ItemGroup>
+
 	<ItemGroup>
-    <None Include="App.config" />
-    <None Include="README.md" />
-    <None Include="ROADMAP.md" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+		<!-- non-code files -->
+		<None Include="App.config" />
+		<None Include="Markdown\README.md" />
+		<None Include="Markdown\ROADMAP.md" />
+		<None Include="Markdown\CHANGELOG.md" />
+	</ItemGroup>
 </Project>

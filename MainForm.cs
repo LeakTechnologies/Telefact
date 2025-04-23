@@ -7,36 +7,57 @@ namespace Telefact
     public class MainForm : Form
     {
         private readonly Renderer _renderer;
+        private readonly Timer _uiTimer;
+        private readonly Timer _subpageTimer;
+        private readonly Timer _pageTimer;
 
         public MainForm()
         {
-            _renderer = new Renderer();
-            this.Text = "Telefact";
-            this.ClientSize = new Size(800, 600);
-            this.BackColor = Color.Black;
-            this.DoubleBuffered = true;
-
-            // Timer for updating the UI every second (e.g., for timestamp update).
-            Timer uiTimer = new Timer();
-            uiTimer.Interval = 1000; // 1 second.
-            uiTimer.Tick += (s, e) => { this.Invalidate(); };
-            uiTimer.Start();
-
-            // New timer for rotating subpages every 10 seconds.
-            Timer subpageTimer = new Timer();
-            subpageTimer.Interval = 10000; // 10 seconds.
-            subpageTimer.Tick += (s, e) =>
+            _renderer = new Renderer
             {
-                _renderer.NextSubpage();
-                this.Invalidate();
+                // start on the first RSS index page
+                PageNumber = 300
             };
-            subpageTimer.Start();
+
+            Text = "Telefact";
+            ClientSize = new Size(800, 600);
+            BackColor = Color.Black;
+            DoubleBuffered = true;
+
+            // 1 Hz redraw (for clock)
+            _uiTimer = new Timer { Interval = 1000 };
+            _uiTimer.Tick += (_, __) => Invalidate();
+            _uiTimer.Start();
+
+            // sub-page rotation (for static story debug page)
+            _subpageTimer = new Timer { Interval = 10000 };
+            _subpageTimer.Tick += (_, __) =>
+            {
+                if (_renderer.PageNumber == 100 || _renderer.PageNumber == 777)
+                    _renderer.NextSubpage();
+                Invalidate();
+            };
+            _subpageTimer.Start();
+
+            // rotate through RSS pages every 10 s
+            _pageTimer = new Timer { Interval = 10000 };
+            _pageTimer.Tick += (_, __) =>
+            {
+                int first = 300;
+                int last = 300 + RSSPages.Categories.Count * RSSPages.PagesPerCategory - 1;
+                int next = _renderer.PageNumber < first || _renderer.PageNumber >= last
+                              ? first
+                              : _renderer.PageNumber + 1;
+                _renderer.PageNumber = next;
+                Invalidate();
+            };
+            _pageTimer.Start();
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
-            _renderer.Render(e.Graphics, this.ClientSize.Width, this.ClientSize.Height);
+            _renderer.Render(e.Graphics, ClientSize.Width, ClientSize.Height);
         }
     }
 }
