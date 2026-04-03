@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Drawing;
 
@@ -16,6 +16,10 @@ namespace Telefact
         private readonly TeletextFooter _footer = new TeletextFooter();
         private readonly TeletextContent _content = new TeletextContent();
 
+        // Cached RSS renderer — recreated only when the page number changes.
+        private TeletextRSSContent _rssContent;
+        private int _lastRssPage = -1;
+
         /// <summary>
         /// Current Teletext page number (e.g., 100, 300, 301, …).
         /// </summary>
@@ -23,18 +27,18 @@ namespace Telefact
 
         public void Render(Graphics g, int clientWidth, int clientHeight)
         {
-            Debug.WriteLine($"[Renderer] Render(page={PageNumber}, size={clientWidth}×{clientHeight})");
+            Debug.WriteLine($"[Renderer] Render(page={PageNumber}, size={clientWidth}x{clientHeight})");
 
-            // 1) Global header
-            _header.Render(g, clientWidth, PageNumber);
-
-            // 2) Grid metrics
+            // 1) Grid metrics
             int totalRows = TeletextGrid.TotalRows;
             int totalCols = TeletextGrid.TotalColumns;
             int cellHeight = clientHeight / totalRows;
             int cellWidth = clientWidth / totalCols;
             int headerHeight = 2 * cellHeight;
             int footerHeight = 1 * cellHeight;
+
+            // 2) Global header (now receives dynamic cell sizing)
+            _header.Render(g, clientWidth, PageNumber, cellWidth, cellHeight);
 
             // 3) Decide branch
             const int baseRSSPage = 300;
@@ -47,8 +51,14 @@ namespace Telefact
             if (isRSSPage)
             {
                 Debug.WriteLine($"[Renderer] RSS branch: page={PageNumber}");
-                var rssRenderer = new TeletextRSSContent(PageNumber);
-                rssRenderer.Render(
+
+                if (_lastRssPage != PageNumber)
+                {
+                    _rssContent = new TeletextRSSContent(PageNumber);
+                    _lastRssPage = PageNumber;
+                }
+
+                _rssContent.Render(
                     g,
                     clientWidth, clientHeight,
                     headerHeight, footerHeight,
@@ -82,7 +92,7 @@ namespace Telefact
 
         public void NextSubpage()
         {
-            if (PageNumber == 100 || PageNumber == 777)
+            if (PageNumber == 777)
                 _content.NextSubpage();
         }
     }

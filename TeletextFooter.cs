@@ -10,11 +10,9 @@ namespace Telefact
     /// </summary>
     public sealed class TeletextFooter
     {
-        private const int PageWidth = 38;  // Usable cells for content.
-        private const int LeftPadding = 1; // Padding cells on the left.
-        private const int RightPadding = 1; // Padding cells on the right.
-
-        private readonly Font Font = new Font("Modeseven", 20f, FontStyle.Regular);
+        private const int PageWidth = 38;
+        private const int LeftPadding = 1;
+        private const int RightPadding = 1;
 
         /// <summary>
         /// Renders the Teletext footer with a fixed grid layout.
@@ -29,15 +27,12 @@ namespace Telefact
             if (g == null)
                 throw new ArgumentNullException(nameof(g));
 
-            // Set a fixed total number of rows (for example, 25 rows is a common Teletext standard).
-            int totalRows = 25;
-            // Footer is assumed to be the very last row in the grid.
-            int footerRowIndex = totalRows - 1;
+            int footerRowIndex = TeletextGrid.TotalRows - 1;
             int footerY = footerRowIndex * cellHeight;
-
-            // Prepare the footer text using the fixed grid row index.
-            string footerText = $"Footer Line – Row {footerRowIndex}";
             int startX = LeftPadding * cellWidth;
+
+            // Navigation hints for the active RSS category blocks.
+            string footerText = "300 NEWS  310 CANADA  320 WORLD";
 
             // Draw a white background for the usable cells in the footer.
             using (Brush backgroundBrush = new SolidBrush(Color.White))
@@ -52,11 +47,13 @@ namespace Telefact
                 g.FillRectangle(blackBrush, rightPaddingX, footerY, RightPadding * cellWidth, cellHeight);
             }
 
-            // Render the footer text, printing each character in its own grid cell.
-            for (int i = 0; i < footerText.Length; i++)
+            using (var font = new Font("Modeseven", cellHeight * 0.8f, FontStyle.Regular))
             {
-                int charX = startX + (i * cellWidth);
-                g.DrawString(footerText[i].ToString(), Font, Brushes.Red, charX, footerY);
+                for (int i = 0; i < footerText.Length; i++)
+                {
+                    int charX = startX + (i * cellWidth);
+                    g.DrawString(footerText[i].ToString(), font, Brushes.Black, charX, footerY);
+                }
             }
         }
     }

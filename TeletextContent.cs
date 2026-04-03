@@ -19,7 +19,7 @@ namespace Telefact
         private const int LeftPadding = 1;
         private const int RightPadding = 1;
 
-        // Default “Top Stories” header.
+        // Default ï¿½Top Storiesï¿½ header.
         private readonly string[] _defaultHeader =
         {
             "---------",
@@ -27,7 +27,7 @@ namespace Telefact
             "---------"
         };
 
-        // Debug “Story of Teletext” header.
+        // Debug ï¿½Story of Teletextï¿½ header.
         private readonly string[] _debugHeader =
         {
             "---------",
@@ -43,7 +43,7 @@ In the early 1970s, when broadcast television was the primary source of home ent
 an ingenious idea was born to deliver data alongside the picture. This innovation came to be known as Teletext. 
 Pioneered in the United Kingdom by the BBC, Teletext began as a way to broadcast simple text and graphics 
 over unused portions of the TV signal. Viewers could access news, weather, sports scores, and even stock 
-prices—all via their television sets.
+pricesï¿½all via their television sets.
 
 Teletext History: The Technological Evolution
 
@@ -63,6 +63,7 @@ simplicity, and accessibility.";
         // Wrapped subpages
         private List<string[]> _subpages = new List<string[]>();
         private int _currentSubpage = 0;
+        private int _lastAvailableRows = -1;
 
         public void PrepareSubpages(int availableRows)
         {
@@ -90,7 +91,12 @@ simplicity, and accessibility.";
 
             int totalRows = contentH / cellHeight;
             if (totalRows < PageHeaderRows + BottomBlankRow) return;
-            if (_subpages.Count == 0) PrepareSubpages(totalRows);
+            if (_subpages.Count == 0 || totalRows != _lastAvailableRows)
+            {
+                PrepareSubpages(totalRows);
+                _lastAvailableRows = totalRows;
+                _currentSubpage = Math.Min(_currentSubpage, Math.Max(0, _subpages.Count - 1));
+            }
 
             // Choose header based on debug flag
             string[] headerLines = ConfigManager.DebugStaticStoryEnabled

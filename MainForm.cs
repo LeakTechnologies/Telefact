@@ -32,7 +32,7 @@ namespace Telefact
             _subpageTimer = new Timer { Interval = 10000 };
             _subpageTimer.Tick += (_, __) =>
             {
-                if (_renderer.PageNumber == 100 || _renderer.PageNumber == 777)
+                if (_renderer.PageNumber == 777)
                     _renderer.NextSubpage();
                 Invalidate();
             };
