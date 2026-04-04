@@ -21,6 +21,12 @@ namespace Telefact
         /// </summary>
         public int PageNumber { get; set; } = 100;
 
+        /// <summary>
+        /// Broadcast loop progress for the current page (0.0 = just loaded, 1.0 = about to advance).
+        /// Used to render the on-screen progress bar.
+        /// </summary>
+        public double PageProgress { get; set; }
+
         public void Render(Graphics g, int clientWidth, int clientHeight)
         {
             Debug.WriteLine($"[Renderer] Render(page={PageNumber}, size={clientWidth}×{clientHeight})");
@@ -76,7 +82,10 @@ namespace Telefact
                 );
             }
 
-            // 4) Global footer
+            // 4) Broadcast progress bar (4 px strip just above footer)
+            RenderProgressBar(g, clientWidth, clientHeight, footerHeight);
+
+            // 5) Global footer
             _footer.Render(g, clientWidth, clientHeight, cellHeight, cellWidth);
         }
 
@@ -84,6 +93,21 @@ namespace Telefact
         {
             if (PageNumber == 100 || PageNumber == 777)
                 _content.NextSubpage();
+        }
+
+        private void RenderProgressBar(Graphics g, int clientWidth, int clientHeight, int footerHeight)
+        {
+            const int barHeight = 4;
+            int barY = clientHeight - footerHeight - barHeight;
+            double clampedProgress = Math.Max(0.0, Math.Min(1.0, PageProgress));
+            int filledWidth = (int)(clientWidth * clampedProgress);
+
+            // Dark background for the full bar slot
+            g.FillRectangle(Brushes.Black, 0, barY, clientWidth, barHeight);
+
+            // Cyan fill showing elapsed time within the current page
+            if (filledWidth > 0)
+                g.FillRectangle(Brushes.Cyan, 0, barY, filledWidth, barHeight);
         }
     }
 }

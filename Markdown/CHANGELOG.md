@@ -2,6 +2,12 @@
 
 All notable changes to the Telefact project will be documented in this file.
 
+## [0.5.0] - 2026-04-04
+### Added
+- **Broadcast loop mode ("Pages from Ceefax")**: Page rotation refactored into an explicit `AdvanceBroadcastPage` method that cycles cleanly through all RSS category index and story pages in sequence, wrapping continuously like a real Ceefax broadcast.
+- **Background audio** (`AudioManager`): Short PC-speaker beeps on every page advance; a two-tone jingle plays when the loop moves to a new category's index page. Runs on a background thread so the UI is never blocked. Silent fallback if the PC speaker is unavailable.
+- **On-screen progress indicator**: A 4 px cyan strip rendered just above the footer by `Renderer`. It fills left-to-right over the 10-second page interval, giving viewers a clear sense of when the next page is due. Updated at 200 ms intervals via a dedicated progress timer in `MainForm`.
+
 ## [0.4.5] - 2025-04-23
 ### Changed
 - TeletextRSSContent now reserves **3 header rows + 1 blank row** before any page content, so everything aligns properly under the header.

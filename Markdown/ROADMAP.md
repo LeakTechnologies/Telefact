@@ -35,14 +35,14 @@ This document tracks both completed milestones and upcoming goals.
 - Index pages: 5 headlines, dot-leader navigation, breathing rows.
 - Story pages: uppercase titles (white), original-case bodies (cyan), robust wrapping & HTML stripping.
 
+### 0.5.0 – Broadcast & Presentation Mode
+- `AdvanceBroadcastPage` loop: clean explicit cycling through all RSS category + story pages.
+- `AudioManager`: background PC-speaker beep on page advance; two-tone jingle on category change.
+- 4 px cyan progress bar in `Renderer` (updated every 200 ms) showing time remaining on the current page.
+
 ---
 
 ## 🔜 Upcoming
-
-### 0.5.0 – Broadcast & Presentation Mode
-- Full “Pages from Ceefax” loop mode.
-- Background audio (beeps, jingles).
-- On-screen progress indicator (page timer).
 
 ### 0.6.0 – Double-Height Titles & Styling
 - Support a separate double-height title font/asset.
